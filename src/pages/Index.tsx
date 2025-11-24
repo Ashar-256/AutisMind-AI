@@ -12,7 +12,7 @@ export default function Index() {
 
   const handleStartScreening = () => {
     if (consentGiven) {
-      navigate('/calibration');
+      navigate('/screening');
     }
   };
 
@@ -115,11 +115,11 @@ export default function Index() {
           <CardContent className="space-y-4">
             <Alert>
               <AlertDescription>
-                <strong>Important:</strong> This tool is for screening purposes only and is not a diagnostic instrument. 
+                <strong>Important:</strong> This tool is for screening purposes only and is not a diagnostic instrument.
                 Always consult with healthcare professionals for proper evaluation and diagnosis.
               </AlertDescription>
             </Alert>
-            
+
             <div className="space-y-3">
               <p className="text-sm text-gray-700">
                 • All video and audio data is processed locally in your browser
@@ -136,8 +136,8 @@ export default function Index() {
             </div>
 
             <div className="flex items-center space-x-2 pt-4">
-              <Checkbox 
-                id="consent" 
+              <Checkbox
+                id="consent"
                 checked={consentGiven}
                 onCheckedChange={(checked) => setConsentGiven(checked as boolean)}
               />
@@ -150,8 +150,8 @@ export default function Index() {
 
         {/* Start Button */}
         <div className="text-center pb-8">
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="px-8 py-3 text-lg"
             onClick={handleStartScreening}
             disabled={!consentGiven}

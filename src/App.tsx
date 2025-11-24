@@ -1,14 +1,12 @@
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Index from './pages/Index';
-import Calibration from './pages/Calibration';
-import TaskA from './pages/TaskA';
-import TaskB from './pages/TaskB';
-import TaskC from './pages/TaskC';
-import Results from './pages/Results';
-import NotFound from './pages/NotFound';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import { ScreeningFlow } from "./pages/ScreeningFlow";
+import { ResultsPage } from "./pages/ResultsPage";
 
 const queryClient = new QueryClient();
 
@@ -16,14 +14,12 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
+      <Sonner />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/calibration" element={<Calibration />} />
-          <Route path="/task-a" element={<TaskA />} />
-          <Route path="/task-b" element={<TaskB />} />
-          <Route path="/task-c" element={<TaskC />} />
-          <Route path="/results" element={<Results />} />
+          <Route path="/screening" element={<ScreeningFlow />} />
+          <Route path="/results" element={<ResultsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

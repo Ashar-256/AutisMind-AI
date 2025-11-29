@@ -11,12 +11,12 @@ interface VideoCaptureProps {
   showControls?: boolean;
 }
 
-export default function VideoCapture({ 
-  onReady, 
-  isRecording = false, 
-  onStartRecording, 
+export default function VideoCapture({
+  onReady,
+  isRecording = false,
+  onStartRecording,
   onStopRecording,
-  showControls = false 
+  showControls = false
 }: VideoCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -46,7 +46,7 @@ export default function VideoCapture({
         streamRef.current = stream;
         setIsStreamActive(true);
         setError(null);
-        
+
         // Call onReady after a short delay to ensure video is playing
         setTimeout(() => {
           onReady?.();
@@ -78,10 +78,10 @@ export default function VideoCapture({
     <Card className="overflow-hidden">
       <div className="relative bg-black">
         {error ? (
-          <div className="aspect-video flex items-center justify-center bg-gray-100">
+          <div className="aspect-video flex items-center justify-center bg-gray-800">
             <div className="text-center space-y-4">
               <CameraOff className="h-12 w-12 text-gray-400 mx-auto" />
-              <p className="text-gray-600">{error}</p>
+              <p className="text-gray-300">{error}</p>
               <Button onClick={startCamera} variant="outline">
                 Try Again
               </Button>
@@ -96,7 +96,7 @@ export default function VideoCapture({
               muted
               className="w-full aspect-video object-cover"
             />
-            
+
             {/* Recording Indicator */}
             {isRecording && (
               <div className="absolute top-4 right-4 flex items-center space-x-2 bg-red-600 text-white px-3 py-1 rounded-full">
@@ -107,9 +107,8 @@ export default function VideoCapture({
 
             {/* Camera Status */}
             <div className="absolute top-4 left-4">
-              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${
-                isStreamActive ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
-              }`}>
+              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${isStreamActive ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
+                }`}>
                 <Camera className="h-4 w-4" />
                 <span className="text-sm">
                   {isStreamActive ? 'Camera Active' : 'Camera Inactive'}
@@ -122,11 +121,10 @@ export default function VideoCapture({
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                 <Button
                   onClick={toggleRecording}
-                  className={`rounded-full w-16 h-16 ${
-                    isRecording 
-                      ? 'bg-red-600 hover:bg-red-700' 
+                  className={`rounded-full w-16 h-16 ${isRecording
+                      ? 'bg-red-600 hover:bg-red-700'
                       : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
+                    }`}
                 >
                   {isRecording ? (
                     <Square className="h-6 w-6" />

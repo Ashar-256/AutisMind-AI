@@ -163,77 +163,131 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
     };
 
     return (
-        <Card className="w-full max-w-4xl mx-auto">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Eye className="w-6 h-6 text-blue-500" />
-                    Visual Preference (Python Powered)
-                    {isConnected ? (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded flex items-center gap-1">
-                            <Wifi className="w-3 h-3" /> Connected
-                        </span>
-                    ) : (
-                        <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded flex items-center gap-1">
-                            <Wifi className="w-3 h-3" /> Disconnected
-                        </span>
-                    )}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        <div className="w-full px-4 mx-auto">
+            <Card className="w-full">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Eye className="w-6 h-6 text-blue-400" />
+                        Visual Preference (Python Powered)
+                        {isConnected ? (
+                            <span className="text-xs bg-green-900 text-green-100 px-2 py-1 rounded flex items-center gap-1">
+                                <Wifi className="w-3 h-3" /> Connected
+                            </span>
+                        ) : (
+                            <span className="text-xs bg-red-900 text-red-100 px-2 py-1 rounded flex items-center gap-1">
+                                <Wifi className="w-3 h-3" /> Disconnected
+                            </span>
+                        )}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
 
-                <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex">
-                    {isRecording && (
-                        <div className="absolute inset-0 z-10 flex opacity-80 pointer-events-none">
-                            <div className="w-1/2 h-full bg-blue-100 flex items-center justify-center border-r-2 border-white">
-                                <div className="text-6xl animate-bounce">👶</div>
+                    <div className="relative h-full bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden">
+                        {/* Full Width Layout */}
+                        <div className="flex h-full">
+                            {/* Left Side: Social/Human Interaction Video */}
+                            <div className="flex-1 w-full flex items-center justify-center bg-blue-900/20 p-4">
+                                <div className="w-full h-full flex flex-col items-center justify-center">
+                                    <div className="w-full flex-1 bg-gray-800 rounded-lg flex items-center justify-center mb-2 overflow-hidden">
+                                        <video
+                                            className="w-full h-full object-cover rounded-lg"
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                        >
+                                            <source src="/videos/social-interaction-real.mp4" type="video/mp4" />
+                                            {/* Fallback content */}
+                                            <div className="text-center space-y-2">
+                                                <div className="text-4xl">👨‍👩‍👧‍👦</div>
+                                                <div className="text-3xl">🤝</div>
+                                                <div className="text-3xl">😊</div>
+                                            </div>
+                                        </video>
+                                    </div>
+                                    <p className="text-sm text-gray-300 font-medium text-center">Social Interaction</p>
+                                </div>
                             </div>
-                            <div className="w-1/2 h-full bg-yellow-100 flex items-center justify-center">
-                                <div className="text-6xl animate-spin">🔷</div>
+
+                            {/* Center: Camera Preview */}
+                            <div className="flex-1 w-full flex items-center justify-center bg-blue-900/20 p-4">
+                                <div className="h-full bg-black rounded-lg overflow-hidden shadow-lg border-2 border-gray-700 relative">
+                                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                    <canvas ref={canvasRef} className="hidden" />
+
+                                    {!stream && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                                            <Video className="w-8 h-8 mb-2" />
+                                            <p className="text-sm">Camera loading...</p>
+                                        </div>
+                                    )}
+
+                                    {isRecording && feedback && (
+                                        <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-sm p-2 rounded">
+                                            <div className="flex justify-between">
+                                                <span>Face: {feedback.face_detected ? "✓" : "✗"}</span>
+                                                <span className="capitalize">{feedback.current_side}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Timer Display */}
+                                    {isRecording && (
+                                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded-full animate-pulse text-sm font-bold shadow-lg">
+                                            {timeLeft}s
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right Side: Geometric Shapes Video */}
+                            <div className="flex-1 w-full flex items-center justify-center bg-purple-900/20 p-4">
+                                <div className="w-full h-full flex flex-col items-center justify-center">
+                                    <div className="w-full flex-1 bg-gray-800 rounded-lg flex items-center justify-center mb-2 overflow-hidden">
+                                        <video
+                                            className="w-full h-full object-cover rounded-lg"
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                        >
+                                            <source src="/videos/geometric-shapes-real.mp4" type="video/mp4" />
+                                            <div className="text-center space-y-2">
+                                                <div className="flex gap-2 justify-center text-4xl">
+                                                    <span>⬛</span>
+                                                    <span>🔵</span>
+                                                </div>
+                                                <div className="flex gap-2 justify-center text-4xl">
+                                                    <span>🔺</span>
+                                                    <span>⬜</span>
+                                                </div>
+                                            </div>
+                                        </video>
+                                    </div>
+                                    <p className="text-sm text-gray-300 font-medium text-center">Geometric Shapes</p>
+                                </div>
                             </div>
                         </div>
-                    )}
+                    </div>
 
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                    <canvas ref={canvasRef} className="hidden" />
+                    <div className="space-y-4">
+                        <p className="text-gray-300">
+                            <strong>Instructions:</strong>
+                            Ensure the backend is running. The video is streamed to Python for analysis. Place videos at /public/videos/social-interaction.mp4 and /public/videos/geometric-shapes.mp4
+                        </p>
 
-                    {isRecording && feedback && (
-                        <div className="absolute bottom-2 left-2 z-20 bg-black/50 text-white text-xs p-2 rounded">
-                            Face: {feedback.face_detected ? "Detected" : "No"} <br />
-                            Gaze: {feedback.current_side}
-                        </div>
-                    )}
-
-                    {!stream && (
-                        <div className="absolute inset-0 flex items-center justify-center text-white z-20">
-                            <Video className="w-12 h-12 mb-2" />
-                            <p>Camera loading...</p>
-                        </div>
-                    )}
-
-                    {isRecording && (
-                        <div className="absolute top-4 right-4 z-30 bg-red-500 text-white px-3 py-1 rounded-full animate-pulse">
-                            {timeLeft}s
-                        </div>
-                    )}
-                </div>
-
-                <div className="space-y-4">
-                    <p className="text-gray-700">
-                        <strong>Instructions:</strong>
-                        Ensure the backend is running. The video is streamed to Python for analysis.
-                    </p>
-
-                    {!isRecording ? (
-                        <Button onClick={handleStart} disabled={!isConnected} className="w-full">
-                            {isConnected ? "Start Python-Tracked Test (60s)" : "Connecting to Backend..."}
-                        </Button>
-                    ) : (
-                        <Button onClick={finishTest} variant="destructive" className="w-full">
-                            Complete Early
-                        </Button>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                        {!isRecording ? (
+                            <Button onClick={handleStart} disabled={!isConnected} className="w-full">
+                                {isConnected ? "Start Python-Tracked Test (120s)" : "Connecting to Backend..."}
+                            </Button>
+                        ) : (
+                            <Button onClick={finishTest} variant="destructive" className="w-full">
+                                Complete Early
+                            </Button>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     );
 };

@@ -132,24 +132,24 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
     };
 
     return (
-        <Card className="w-full max-w-2xl mx-auto">
+        <Card className="w-full max-w-2xl mx-auto bg-black/40 backdrop-blur-md border-gray-800">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Ear className="w-6 h-6 text-purple-500" />
                     Response to Name (Python Powered)
                     {isConnected ? (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded flex items-center gap-1">
+                        <span className="text-xs bg-green-900/50 text-green-200 px-2 py-1 rounded flex items-center gap-1">
                             <Wifi className="w-3 h-3" /> Connected
                         </span>
                     ) : (
-                        <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded flex items-center gap-1">
+                        <span className="text-xs bg-red-900/50 text-red-200 px-2 py-1 rounded flex items-center gap-1">
                             <Wifi className="w-3 h-3" /> Disconnected
                         </span>
                     )}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
+                <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden relative">
                     <video
                         ref={videoRef}
                         autoPlay
@@ -182,7 +182,7 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
                 </div>
 
                 <div className="space-y-4">
-                    <p className="text-gray-700">
+                    <p className="text-gray-300">
                         <strong>Instructions:</strong>
                         Click Start. Call your child's name. Python AI will detect if they turn their head towards the camera.
                     </p>

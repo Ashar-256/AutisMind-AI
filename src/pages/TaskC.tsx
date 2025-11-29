@@ -24,7 +24,7 @@ export default function TaskC() {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (isRecording && timeRemaining > 0) {
       interval = setInterval(() => {
         setTimeRemaining(prev => {
@@ -37,7 +37,7 @@ export default function TaskC() {
         });
       }, 1000);
     }
-    
+
     return () => clearInterval(interval);
   }, [isRecording, timeRemaining]);
 
@@ -62,18 +62,18 @@ export default function TaskC() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2 pt-8">
           <Heart className="h-10 w-10 text-purple-600 mx-auto" />
-          <h1 className="text-3xl font-bold text-gray-900">Task 3: Free Play</h1>
-          <p className="text-gray-600">Observing natural behaviors during unstructured play time</p>
+          <h1 className="text-3xl font-bold text-white">Task 3: Free Play</h1>
+          <p className="text-gray-300">Observing natural behaviors during unstructured play time</p>
         </div>
 
         {/* Progress */}
         <div className="space-y-2">
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex justify-between text-sm text-gray-300">
             <span>Assessment Progress</span>
             <span>Task 3 of 3</span>
           </div>
@@ -89,12 +89,11 @@ export default function TaskC() {
             <div className="grid md:grid-cols-2 gap-4">
               {instructions.map((instruction, index) => (
                 <div key={index} className="flex items-start space-x-3">
-                  <div className={`rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold ${
-                    currentStep > index ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
+                  <div className={`rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold ${currentStep > index ? 'bg-purple-900 text-purple-100' : 'bg-blue-900 text-blue-100'
+                    }`}>
                     {index + 1}
                   </div>
-                  <p className="text-sm text-gray-700">{instruction}</p>
+                  <p className="text-sm text-gray-300">{instruction}</p>
                 </div>
               ))}
             </div>
@@ -106,7 +105,7 @@ export default function TaskC() {
           {/* Video */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Video Recording</h3>
-            <VideoCapture 
+            <VideoCapture
               isRecording={isRecording}
               onStartRecording={handleStartRecording}
               onStopRecording={handleStopRecording}
@@ -118,16 +117,16 @@ export default function TaskC() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Audio Monitoring</h3>
             <AudioCapture isRecording={isRecording} />
-            
+
             {/* Timer */}
             {isRecording && (
-              <Card className="bg-purple-50 border-purple-200">
+              <Card className="bg-purple-900/20 border-purple-800">
                 <CardContent className="text-center py-6">
                   <Clock className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                  <div className="text-3xl font-bold text-purple-700">
+                  <div className="text-3xl font-bold text-purple-100">
                     {formatTime(timeRemaining)}
                   </div>
-                  <p className="text-sm text-purple-600">Recording in progress</p>
+                  <p className="text-sm text-purple-300">Recording in progress</p>
                 </CardContent>
               </Card>
             )}
@@ -135,7 +134,7 @@ export default function TaskC() {
             {/* Controls */}
             <div className="space-y-4">
               {!isRecording && !taskComplete && (
-                <Button 
+                <Button
                   onClick={handleStartRecording}
                   className="w-full bg-purple-600 hover:bg-purple-700"
                   size="lg"
@@ -145,7 +144,7 @@ export default function TaskC() {
               )}
 
               {isRecording && (
-                <Button 
+                <Button
                   onClick={handleStopRecording}
                   variant="destructive"
                   className="w-full"
@@ -159,12 +158,12 @@ export default function TaskC() {
                 <div className="space-y-4">
                   <Alert>
                     <AlertDescription>
-                      All tasks completed successfully! The AI system is now analyzing 
+                      All tasks completed successfully! The AI system is now analyzing
                       the collected behavioral data to generate your assessment results.
                     </AlertDescription>
                   </Alert>
-                  
-                  <Button 
+
+                  <Button
                     onClick={handleViewResults}
                     className="w-full bg-purple-600 hover:bg-purple-700"
                     size="lg"
@@ -179,12 +178,12 @@ export default function TaskC() {
         </div>
 
         {/* Observation Points */}
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-blue-900/20 border-blue-800">
           <CardHeader>
-            <CardTitle className="text-blue-800">What We're Observing:</CardTitle>
+            <CardTitle className="text-blue-100">What We're Observing:</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-700">
+            <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-200">
               <div>
                 <h4 className="font-semibold mb-2">Movement Patterns</h4>
                 <ul className="space-y-1">
@@ -214,10 +213,10 @@ export default function TaskC() {
         </Card>
 
         {/* Tips */}
-        <Card className="bg-amber-50 border-amber-200">
+        <Card className="bg-amber-900/20 border-amber-800">
           <CardContent className="py-4">
-            <h4 className="font-semibold text-amber-800 mb-2">Tips for Best Results:</h4>
-            <ul className="text-sm text-amber-700 space-y-1">
+            <h4 className="font-semibold text-amber-100 mb-2">Tips for Best Results:</h4>
+            <ul className="text-sm text-amber-200 space-y-1">
               <li>• Let your child play completely naturally</li>
               <li>• Avoid giving instructions or guidance</li>
               <li>• Stay nearby but don't actively engage unless they initiate</li>

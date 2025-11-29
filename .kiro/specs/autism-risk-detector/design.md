@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AI-Powered Early Autism Risk Detector is a React-based web application that provides a comprehensive screening tool for early autism risk assessment in toddlers. The application leverages modern web technologies including WebRTC for media capture, Web Audio API for real-time audio analysis, and client-side processing to ensure privacy and security.
+The AutisMind AI is a React-based web application that provides a comprehensive screening tool for early autism risk assessment in toddlers. The application leverages modern web technologies including WebRTC for media capture, Web Audio API for real-time audio analysis, and client-side processing to ensure privacy and security.
 
 The system follows a progressive workflow design, guiding users through consent, device setup, three structured assessment tasks, AI analysis simulation, and results presentation. The architecture prioritizes user experience, accessibility, and data privacy while providing meaningful behavioral insights.
 

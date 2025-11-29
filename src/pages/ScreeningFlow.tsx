@@ -155,10 +155,10 @@ export const ScreeningFlow: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-            <div className="max-w-3xl mx-auto space-y-8">
+        <div className="min-h-screen p-4 md:p-8">
+            <div className="w-full mx-auto space-y-8">
                 <div className="space-y-2">
-                    <div className="flex justify-between text-sm font-medium text-gray-500">
+                    <div className="flex justify-between text-sm font-medium text-gray-400">
                         <span>Step {step} of {totalSteps}</span>
                         <span>{Math.round(progress)}% Completed</span>
                     </div>
@@ -174,7 +174,7 @@ export const ScreeningFlow: React.FC = () => {
 
                     {isSubmitting && (
                         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                            <div className="bg-white p-6 rounded-lg text-center">
+                            <div className="bg-gray-900 p-6 rounded-lg text-center border border-gray-800">
                                 <div className="animate-spin text-4xl mb-4">🔄</div>
                                 <p>Analyzing behavioral patterns...</p>
                             </div>

@@ -26,12 +26,15 @@ class TrackingEngine:
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(
             max_num_hands=2,
-            min_detection_confidence=0.5,
-            min_tracking_confidence=0.5
+            min_detection_confidence=0.3, # Lowered for better detection
+            min_tracking_confidence=0.3
         )
         
         # Advanced Pose Tracker for detailed analysis
         self.pose_tracker = PoseTracker(movement_threshold=0.02)
+        
+        # Smoothing state
+        self.gaze_ema = 0.5
 
     def process_frame(self, image_data_base64, task_type="eye_contact"):
         """
@@ -69,10 +72,59 @@ class TrackingEngine:
                     right_ear = landmarks[454]
                     mid_ear_x = (left_ear.x + right_ear.x) / 2
                     # Yaw: Positive = Left turn (user's right), Negative = Right turn
+                    # Reverting to nose - mid_ear based on user feedback of inversion
                     results["head_yaw"] = nose.x - mid_ear_x 
                     
-                    # Gaze (Simple nose-based)
-                    results["gaze_x"] = nose.x
+                    # Real Gaze Detection (Iris Tracking)
+                    # Left Eye Indices: 33 (Inner), 133 (Outer), 468 (Iris)
+                    # Right Eye Indices: 362 (Inner), 263 (Outer), 473 (Iris)
+                    
+                    try:
+                        # Helper to get eye ratio (0.0=Left, 1.0=Right)
+                        def get_eye_ratio(eye_points, iris_point):
+                            xs = [landmarks[idx].x for idx in eye_points]
+                            min_x = min(xs)
+                            max_x = max(xs)
+                            width = max_x - min_x
+                            if width == 0: return 0.5
+                            # Normalize iris position within eye width
+                            # 0.0 = Left side of eye (Screen Left), 1.0 = Right side of eye (Screen Right)
+                            return (landmarks[iris_point].x - min_x) / width
+
+                        # Left Eye (33, 133)
+                        l_ratio = get_eye_ratio([33, 133], 468)
+                        
+                        # Right Eye (362, 263)
+                        r_ratio = get_eye_ratio([362, 263], 473)
+                        
+                        # Average Gaze
+                        raw_gaze = (l_ratio + r_ratio) / 2.0
+                        
+                        # Apply Sensitivity Multiplier to Eye Movement
+                        sensitivity = 2.0 
+                        raw_gaze = (raw_gaze - 0.5) * sensitivity + 0.5
+                        
+                        # Integrate Head Yaw (Head Turn)
+                        # If user turns head Left (Negative Yaw), push gaze Left.
+                        # If user turns head Right (Positive Yaw), push gaze Right.
+                        # Yaw is typically small (-0.1 to 0.1), so we need a large weight.
+                        head_yaw = results.get("head_yaw", 0)
+                        yaw_weight = 4.0
+                        
+                        combined_gaze = raw_gaze + (head_yaw * yaw_weight)
+                        
+                        # Clamp to 0.0 - 1.0
+                        final_gaze = max(0.0, min(1.0, combined_gaze))
+                        
+                        # Apply Smoothing (Exponential Moving Average)
+                        alpha = 0.2 
+                        self.gaze_ema = (alpha * final_gaze) + ((1 - alpha) * self.gaze_ema)
+                        
+                        results["gaze_x"] = self.gaze_ema
+                        
+                    except Exception as e:
+                        print(f"Gaze calc error: {e}")
+                        results["gaze_x"] = 0.5 # Fallback to center
                 else:
                     results["face_detected"] = False
 

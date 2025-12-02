@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, Video, Wifi } from 'lucide-react';
+import { API_URL } from '@/config';
 
 interface EyeContactData {
     eye_contact_score: 0 | 1 | 2;
@@ -44,7 +45,8 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
     }, []);
 
     const connectWebSocket = () => {
-        const ws = new WebSocket('ws://localhost:8000/ws/analyze');
+        const wsUrl = API_URL.replace(/^http/, 'ws') + '/ws/analyze';
+        const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
             console.log('Connected to NeuroLens Backend');
@@ -71,7 +73,7 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
     const startCamera = async () => {
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 320, height: 240 }
+                video: { width: 640, height: 480 }
             });
             setStream(mediaStream);
             if (videoRef.current) {
@@ -108,9 +110,13 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
                     if (ctx && video.readyState === 4) {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
+
+                        // Mirror the canvas drawing to match the mirrored video
+                        ctx.translate(canvas.width, 0);
+                        ctx.scale(-1, 1);
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                        const base64 = canvas.toDataURL('image/jpeg', 0.5);
+                        const base64 = canvas.toDataURL('image/jpeg', 0.7);
 
                         wsRef.current.send(JSON.stringify({
                             task: "eye_contact",
@@ -184,7 +190,7 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
 
                     <div className="relative h-full bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden">
                         {/* Full Width Layout */}
-                        <div className="flex h-full">
+                        <div className="flex-1 h-full flex justify-between">
                             {/* Left Side: Social/Human Interaction Video */}
                             <div className="flex-1 w-full flex items-center justify-center bg-blue-900/20 p-4">
                                 <div className="w-full h-full flex flex-col items-center justify-center">
@@ -196,7 +202,7 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
                                             muted
                                             playsInline
                                         >
-                                            <source src="/videos/social-interaction-real.mp4" type="video/mp4" />
+                                            <source src={`${import.meta.env.BASE_URL}videos/social-interaction-real.mp4`} type="video/mp4" />
                                             {/* Fallback content */}
                                             <div className="text-center space-y-2">
                                                 <div className="text-4xl">👨‍👩‍👧‍👦</div>
@@ -210,9 +216,9 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
                             </div>
 
                             {/* Center: Camera Preview */}
-                            <div className="flex-1 w-full flex items-center justify-center bg-blue-900/20 p-4">
+                            <div className="flex-1 w-full flex items-center justify-center  bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-4">
                                 <div className="h-full bg-black rounded-lg overflow-hidden shadow-lg border-2 border-gray-700 relative">
-                                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" />
                                     <canvas ref={canvasRef} className="hidden" />
 
                                     {!stream && (
@@ -251,7 +257,7 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
                                             muted
                                             playsInline
                                         >
-                                            <source src="/videos/geometric-shapes-real.mp4" type="video/mp4" />
+                                            <source src={`${import.meta.env.BASE_URL}videos/geometric-shapes-real.mp4`} type="video/mp4" />
                                             <div className="text-center space-y-2">
                                                 <div className="flex gap-2 justify-center text-4xl">
                                                     <span>⬛</span>
@@ -273,12 +279,12 @@ export const EyeContactModule: React.FC<EyeContactModuleProps> = ({ onComplete }
                     <div className="space-y-4">
                         <p className="text-gray-300">
                             <strong>Instructions:</strong>
-                            Ensure the backend is running. The video is streamed to Python for analysis. Place videos at /public/videos/social-interaction.mp4 and /public/videos/geometric-shapes.mp4
+                            Keep the child's head straight towards the screen for accurate results.
                         </p>
 
                         {!isRecording ? (
                             <Button onClick={handleStart} disabled={!isConnected} className="w-full">
-                                {isConnected ? "Start Python-Tracked Test (120s)" : "Connecting to Backend..."}
+                                {isConnected ? "Start Python-Tracked Test (60s)" : "Connecting to Backend..."}
                             </Button>
                         ) : (
                             <Button onClick={finishTest} variant="destructive" className="w-full">

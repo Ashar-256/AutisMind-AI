@@ -32,7 +32,7 @@ const App = () => (
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/technology" element={<TechnologyPage />} />

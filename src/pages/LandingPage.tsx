@@ -88,7 +88,7 @@ export default function LandingPage() {
                     <div className="group relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm transition-all hover:bg-white/10">
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60"></div>
                         <img
-                            src="/images/christian-bowen-OJOE587CWuE-unsplash.jpg"
+                            src={`${import.meta.env.BASE_URL}images/christian-bowen-OJOE587CWuE-unsplash.jpg`}
                             alt="Face Scan"
                             className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
                         />
@@ -102,7 +102,7 @@ export default function LandingPage() {
                     {/* Card 2: Frosted Glass / Analysis */}
                     <div className="group relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-md transition-all hover:bg-white/10">
                         <img
-                            src="/images/colin-maynard-CEEhmAGpYzE-unsplash.jpg"
+                            src={`${import.meta.env.BASE_URL}images/colin-maynard-CEEhmAGpYzE-unsplash.jpg`}
                             alt="Analysis"
                             className="w-full h-full object-cover opacity-60 blur-[2px] group-hover:blur-0 transition-all duration-700"
                         />
@@ -120,7 +120,7 @@ export default function LandingPage() {
                     <div className="group relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm transition-all hover:bg-white/10">
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60"></div>
                         <img
-                            src="/images/tim-bish-WbC9XIlQb4k-unsplash.jpg"
+                            src={`${import.meta.env.BASE_URL}images/tim-bish-WbC9XIlQb4k-unsplash.jpg`}
                             alt="Baby Yawning"
                             className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
                         />
@@ -130,7 +130,7 @@ export default function LandingPage() {
                     {/* Card 4: Focus / Eye Tracking */}
                     <div className="group relative rounded-2xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm transition-all hover:bg-white/10">
                         <img
-                            src="/images/omar-lopez-vTknj2OxDVg-unsplash.jpg"
+                            src={`${import.meta.env.BASE_URL}images/omar-lopez-vTknj2OxDVg-unsplash.jpg`}
                             alt="Eye Tracking"
                             className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-700"
                         />

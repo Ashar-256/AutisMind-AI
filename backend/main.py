@@ -107,23 +107,48 @@ async def websocket_endpoint(websocket: WebSocket):
                     if analysis["face_detected"]:
                         session["metrics"]["framesFaceDetected"] += 1
                         # Side Logic
-                        current_side = "none"
-                        if analysis["face_x"] < 0.5:
+                        # Side Logic (Using Gaze instead of Face Position)
+                        # Gaze X: 0.0 (Left/Social) <-> 1.0 (Right/Geometric)
+                        # Center Zone: 0.45 to 0.55 (Narrowed from 0.4-0.6)
+                        
+                        gaze = analysis.get("gaze_x", 0.5)
+                        current_side = "center"
+                        
+                        if gaze < 0.45:
                             session["metrics"]["framesSocialSide"] += 1
                             current_side = "social"
-                        else:
+                        elif gaze > 0.55:
                             session["metrics"]["framesGeometricSide"] += 1
                             current_side = "geometric"
+                        else:
+                            # Center - maybe track this too if needed
+                            pass
                         
-                        if session["metrics"]["lastSide"] != "none" and current_side != session["metrics"]["lastSide"]:
-                            session["metrics"]["sideSwitchCount"] += 1
-                        session["metrics"]["lastSide"] = current_side
+                        if session["metrics"]["lastSide"] != "none" and current_side != "center" and current_side != session["metrics"]["lastSide"]:
+                             # Only count switches between actual sides, or include center?
+                             # Usually attention shift is Side A -> Side B.
+                             # If Side A -> Center -> Side B, that's one shift?
+                             # For now, let's count switch if we leave a side?
+                             # Let's stick to simple: if current_side changes and is not none.
+                             pass
+                             
+                        if current_side != "center":
+                             if session["metrics"]["lastSide"] != "none" and current_side != session["metrics"]["lastSide"]:
+                                 session["metrics"]["sideSwitchCount"] += 1
+                             session["metrics"]["lastSide"] = current_side
                         
                         response["current_side"] = current_side
-                        response["gaze_x"] = analysis["gaze_x"]
+                        response["gaze_x"] = gaze
 
                 # 2. Name Response
                 elif task == "name_response":
+                    # Check for commands
+                    if message.get("command") == "reset_yaw":
+                        session["metrics"]["initialYaw"] = None
+                        session["metrics"]["maxYawChange"] = 0.0
+                        # Don't process frame if it's just a command
+                        continue
+
                     response["face_detected"] = analysis["face_detected"]
                     if analysis["face_detected"]:
                         yaw = analysis["head_yaw"]
@@ -154,6 +179,12 @@ async def websocket_endpoint(websocket: WebSocket):
                             session["metrics"]["bodyMovementSum"] += movement
                         session["metrics"]["lastBodyX"] = body_x
                         
+                        # Normalize movement score (Movement per frame * 1000 for readability)
+                        # This prevents it from just increasing forever
+                        avg_movement = 0
+                        if session["metrics"]["totalFrames"] > 0:
+                            avg_movement = (session["metrics"]["bodyMovementSum"] / session["metrics"]["totalFrames"]) * 1000
+                        
                         # Enhanced pose tracking data
                         if "landmarks" in analysis:
                             response["landmarks"] = analysis["landmarks"]
@@ -176,7 +207,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             response["rocking_detected"] = analysis.get("rocking_detected", False)
                             response["arm_swaying_detected"] = analysis.get("arm_swaying_detected", False)
                         
-                        response["movement_score"] = session["metrics"]["bodyMovementSum"]
+                        response["movement_score"] = avg_movement
                         response["total_movements"] = session["metrics"]["totalRepetitiveMovements"]
 
             await websocket.send_json(response)

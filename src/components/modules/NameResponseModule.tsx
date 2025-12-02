@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Ear, Mic, Wifi, User } from 'lucide-react';
+import { Ear, Mic, Wifi } from 'lucide-react';
+import { API_URL } from '@/config';
 
 interface NameResponseData {
     response_to_name_score: 0 | 1 | 2;
@@ -34,7 +35,8 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
     }, []);
 
     const connectWebSocket = () => {
-        const ws = new WebSocket('ws://localhost:8000/ws/analyze');
+        const wsUrl = API_URL.replace(/^http/, 'ws') + '/ws/analyze';
+        const ws = new WebSocket(wsUrl);
         ws.onopen = () => setIsConnected(true);
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -49,7 +51,10 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
 
     const startCamera = async () => {
         try {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480 },
+                audio: true
+            });
             setStream(mediaStream);
             if (videoRef.current) {
                 videoRef.current.srcObject = mediaStream;
@@ -85,11 +90,15 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
                     if (ctx && video.readyState === 4) {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
+
+                        // Mirror the canvas drawing
+                        ctx.translate(canvas.width, 0);
+                        ctx.scale(-1, 1);
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
                         wsRef.current.send(JSON.stringify({
                             task: "name_response",
-                            image: canvas.toDataURL('image/jpeg', 0.5)
+                            image: canvas.toDataURL('image/jpeg', 0.7)
                         }));
                     }
                 }
@@ -107,22 +116,73 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
         };
     }, [isRecording, timeLeft]);
 
-    const handleStart = () => {
-        setIsRecording(true);
-        setTimeLeft(10);
-        setStatus("Listening for name call...");
+    const [childName, setChildName] = useState("");
+    const [isListeningForName, setIsListeningForName] = useState(false);
+    const recognitionRef = useRef<any>(null);
 
-        // Simulate Audio Event
-        setTimeout(() => {
-            setStatus("Name call detected! Monitoring head turn...");
-        }, 3000);
+    const handleStart = () => {
+        if (!childName.trim()) {
+            alert("Please enter the child's name first.");
+            return;
+        }
+
+        setIsRecording(true);
+        setIsListeningForName(true);
+        setTimeLeft(10);
+        setStatus(`Listening for "${childName}"...`);
+
+        // Initialize Speech Recognition
+        if ('webkitSpeechRecognition' in window) {
+            const recognition = new (window as any).webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event: any) => {
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        const transcript = event.results[i][0].transcript.trim().toLowerCase();
+                        console.log("Heard:", transcript);
+                        if (transcript.includes(childName.toLowerCase())) {
+                            triggerNameDetection();
+                        }
+                    }
+                }
+            };
+
+            recognition.start();
+            recognitionRef.current = recognition;
+        } else {
+            // Fallback for browsers without speech recognition
+            alert("Speech recognition not supported. Using 3s timer fallback.");
+            setTimeout(triggerNameDetection, 3000);
+        }
+    };
+
+    const triggerNameDetection = () => {
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+        }
+        setIsListeningForName(false);
+        setStatus("Name detected! Monitoring head turn...");
+
+        // Reset Backend Yaw Reference
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({
+                task: "name_response",
+                command: "reset_yaw"
+            }));
+        }
     };
 
     const finishTest = () => {
         setIsRecording(false);
+        setIsListeningForName(false);
+        if (recognitionRef.current) {
+            recognitionRef.current.stop();
+        }
 
         // Determine score based on feedback
-        // If head turn was detected (feedback.head_turn_detected), score is good
         const responded = feedback?.head_turn_detected || false;
 
         onComplete({
@@ -155,7 +215,7 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
                         autoPlay
                         playsInline
                         muted
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover scale-x-[-1]"
                     />
                     <canvas ref={canvasRef} className="hidden" />
 
@@ -175,8 +235,21 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
                         </div>
                     )}
                     {isRecording && (
-                        <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-md">
-                            {status}
+                        <div className="absolute bottom-4 left-4 right-4 flex justify-center">
+                            <div className={`px-4 py-2 rounded-full font-bold text-sm shadow-lg backdrop-blur-md transition-all ${isListeningForName
+                                    ? "bg-blue-500/80 text-white animate-pulse"
+                                    : "bg-green-500/80 text-white"
+                                }`}>
+                                {isListeningForName ? (
+                                    <span className="flex items-center gap-2">
+                                        <Mic className="w-4 h-4" /> Listening for "{childName}"...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        <Ear className="w-4 h-4" /> Name Heard! Watching Head...
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -188,9 +261,19 @@ export const NameResponseModule: React.FC<NameResponseModuleProps> = ({ onComple
                     </p>
 
                     {!isRecording && (
-                        <Button onClick={handleStart} disabled={!isConnected} className="w-full">
-                            Start Python-Tracked Test (10s)
-                        </Button>
+                        <div className="space-y-2">
+                            <label className="text-sm text-gray-400">Child's Name:</label>
+                            <input
+                                type="text"
+                                value={childName}
+                                onChange={(e) => setChildName(e.target.value)}
+                                className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white"
+                                placeholder="Enter name (e.g., Sarah)"
+                            />
+                            <Button onClick={handleStart} disabled={!isConnected || !childName} className="w-full">
+                                Start Python-Tracked Test (10s)
+                            </Button>
+                        </div>
                     )}
                 </div>
             </CardContent>

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Mic, MessageCircle, Wifi } from 'lucide-react';
+import { API_URL } from '@/config';
 
 interface VocalizationData {
     vocalization_score: 0 | 1 | 2;
@@ -34,7 +35,8 @@ export const VocalizationModule: React.FC<VocalizationModuleProps> = ({ onComple
     }, []);
 
     const connectWebSocket = () => {
-        const ws = new WebSocket('ws://localhost:8000/ws/audio');
+        const wsUrl = API_URL.replace(/^http/, 'ws') + '/ws/audio';
+        const ws = new WebSocket(wsUrl);
         ws.onopen = () => setIsConnected(true);
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -67,7 +69,7 @@ export const VocalizationModule: React.FC<VocalizationModuleProps> = ({ onComple
             streamRef.current = stream;
 
             // Create audio context
-            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
+            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             audioContextRef.current = audioContext;
 
             const source = audioContext.createMediaStreamSource(stream);
@@ -160,31 +162,50 @@ export const VocalizationModule: React.FC<VocalizationModuleProps> = ({ onComple
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="h-32 bg-gray-900 rounded-lg flex items-center justify-center relative overflow-hidden">
+                <div className="h-48 bg-gray-900 rounded-lg flex flex-col items-center justify-center relative overflow-hidden border border-gray-800">
                     {isRecording ? (
-                        <div className="flex flex-col items-center gap-2 w-full px-4">
-                            <div className="flex items-center gap-1">
-                                {[...Array(10)].map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="w-2 bg-green-500 rounded-full transition-all"
-                                        style={{
-                                            height: `${Math.min((feedback?.rms || 0) / 50, 80)}px`,
-                                            opacity: i % 2 === 0 ? 1 : 0.7
-                                        }}
-                                    />
-                                ))}
+                        <div className="flex flex-col items-center gap-4 w-full px-4 z-10">
+                            {/* Speech Status Badge */}
+                            <div className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${feedback?.is_speech ? "bg-green-500 text-white" : "bg-gray-700 text-gray-400"
+                                }`}>
+                                {feedback?.is_speech ? "🗣️ SPEECH DETECTED" : "Silence"}
                             </div>
+                            {/* Volume Bars */}
+                            <div className="flex items-end gap-1 h-24">
+                                {[...Array(20)].map((_, i) => {
+                                    // Create a wave effect
+                                    const volume = (feedback?.rms || 0);
+                                    // Scale: RMS 0-3000 -> 0-100% height
+                                    const baseHeight = (volume / 3000) * 100;
+                                    const randomFactor = Math.random() * 0.3 + 0.85; // Flicker
+                                    const height = Math.min(Math.max(baseHeight * randomFactor, 4), 100);
+
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`w-2 rounded-t-sm transition-all duration-75 ${feedback?.is_speech ? "bg-green-400" : "bg-gray-600"
+                                                }`}
+                                            style={{
+                                                height: `${height}%`,
+                                                opacity: feedback?.is_speech ? 1 : 0.5
+                                            }}
+                                        />
+                                    );
+                                })}
+                            </div>
+
                             {feedback && (
-                                <div className="text-white text-xs text-center">
-                                    <div>Volume: {feedback.volume_level}</div>
-                                    <div>{feedback.is_speech ? "🎤 Vocalizing!" : "Quiet"}</div>
-                                    <div>Speech: {feedback.vocal_percentage?.toFixed(1)}%</div>
+                                <div className="text-gray-400 text-xs text-center">
+                                    <div>Volume Level: {feedback.volume_level}</div>
+                                    <div>Total Speech: {feedback.vocal_percentage?.toFixed(1)}%</div>
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <Mic className="w-12 h-12 text-gray-600" />
+                        <div className="flex flex-col items-center gap-2 text-gray-500">
+                            <Mic className="w-12 h-12" />
+                            <span>Ready to Record</span>
+                        </div>
                     )}
                 </div>
 
@@ -210,6 +231,6 @@ export const VocalizationModule: React.FC<VocalizationModuleProps> = ({ onComple
                     )}
                 </div>
             </CardContent>
-        </Card>
+        </Card >
     );
 };

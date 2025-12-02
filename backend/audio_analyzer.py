@@ -5,8 +5,8 @@ import struct
 class AudioAnalyzer:
     def __init__(self):
         self.sample_rate = 16000  # 16kHz
-        self.silence_threshold = 500  # RMS threshold for silence
-        self.speech_threshold = 1000  # RMS threshold for speech
+        self.silence_threshold = 300  # RMS threshold for silence
+        self.speech_threshold = 600  # RMS threshold for speech
         
     def analyze_audio_chunk(self, audio_data_base64):
         """

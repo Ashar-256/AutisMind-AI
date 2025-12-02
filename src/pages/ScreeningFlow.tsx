@@ -7,6 +7,7 @@ import { VocalizationModule } from '@/components/modules/VocalizationModule';
 import { GesturesModule } from '@/components/modules/GesturesModule';
 import { RepetitiveBehaviorModule } from '@/components/modules/RepetitiveBehaviorModule';
 import { ScreeningResult } from '@/types/screening';
+import { API_URL } from '@/config';
 
 export const ScreeningFlow: React.FC = () => {
     const navigate = useNavigate();
@@ -63,7 +64,7 @@ export const ScreeningFlow: React.FC = () => {
             }
 
             // Call Python Backend
-            const response = await fetch('http://localhost:8000/api/analyze', {
+            const response = await fetch(`${API_URL}/api/analyze`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,13 +140,17 @@ export const ScreeningFlow: React.FC = () => {
             navigate('/results', { state: resultPayload });
 
         } catch (error) {
-            console.error("Backend Error:", error);
+            console.error("Backend Error Details:", error);
+            if (error instanceof TypeError && error.message === "Failed to fetch") {
+                console.error("Network error: Could not connect to backend at", API_URL);
+                console.error("Possible causes: Backend not running, CORS issue, or mixed content (HTTPS vs HTTP).");
+            }
             // Fallback to local calculation if backend fails
             navigate('/results', {
                 state: {
                     risk_score: 0,
                     risk_band: "Error",
-                    flags: ["Backend connection failed"],
+                    flags: ["Backend connection failed - check console"],
                     domain_scores: { social: 0, response: 0, vocal: 0, repetitive: 0, gestures: 0 }
                 }
             });

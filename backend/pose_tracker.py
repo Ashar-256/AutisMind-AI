@@ -11,7 +11,7 @@ class PoseTracker:
     using MediaPipe Pose landmarks
     """
     
-    def __init__(self, movement_threshold=0.02):
+    def __init__(self, movement_threshold=0.02, log_to_csv=False):
         self.mp_pose = mp.solutions.pose
         self.pose = self.mp_pose.Pose(
             min_detection_confidence=0.5,
@@ -19,6 +19,7 @@ class PoseTracker:
         )
         
         self.movement_threshold = movement_threshold
+        self.log_to_csv_enabled = log_to_csv
         
         # Movement tracking
         self.prev_landmarks = {}
@@ -30,8 +31,10 @@ class PoseTracker:
         self.max_history_length = 30  # frames
         
         # CSV logging setup
-        self.csv_file = f"pose_tracking_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        self.init_csv()
+        self.csv_file = None
+        if self.log_to_csv_enabled:
+            self.csv_file = f"pose_tracking_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            self.init_csv()
     
     def init_csv(self):
         """Initialize CSV file for logging movements"""
@@ -47,6 +50,9 @@ class PoseTracker:
     
     def log_movement(self, landmark_name, coords, movement_detected, pattern_type=""):
         """Log movement to CSV"""
+        if not self.csv_file:
+            return
+            
         try:
             with open(self.csv_file, 'a', newline='') as f:
                 writer = csv.writer(f)
@@ -236,6 +242,7 @@ class PoseTracker:
         self.body_sway_history.clear()
         self.prev_landmarks.clear()
         
-        # Create new CSV file
-        self.csv_file = f"pose_tracking_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        self.init_csv()
+        # Create new CSV file only if enabled
+        if self.log_to_csv_enabled:
+            self.csv_file = f"pose_tracking_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            self.init_csv()

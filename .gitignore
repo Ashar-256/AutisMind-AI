@@ -59,3 +59,9 @@ env/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+.env
+.vscode
+
+# Data Logs
+*.csv
+backend/pose_tracking_*.csv

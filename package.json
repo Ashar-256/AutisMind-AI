@@ -2,12 +2,12 @@
   "name": "shadcnui",
   "type": "module",
   "packageManager": "pnpm@10.18.3",
-  "homepage": "https://surf3rr.github.io/mumbai-hacks/",
+  "homepage": "https://github.com/Ashar-256/AutisMind-AI",
   "scripts": {
     "predeploy": "pnpm run build",
     "deploy": "gh-pages -d dist",
     "dev": "vite",
-    "start": "react-scripts start",
+    "start": "vite",
     "build": "vite build",
     "lint": "eslint --quiet ./src",
     "preview": "vite preview"

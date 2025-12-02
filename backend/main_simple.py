@@ -129,3 +129,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         logger.info("Audio WebSocket client disconnected")
     except Exception as e:
         logger.error(f"Audio WebSocket Error: {e}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

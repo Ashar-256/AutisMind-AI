@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Hand, Wifi } from 'lucide-react';
+import { API_URL } from '@/config';
 
 interface GesturesData {
     gesture_joint_attention_score: 0 | 1 | 2;
@@ -33,7 +34,8 @@ export const GesturesModule: React.FC<GesturesModuleProps> = ({ onComplete }) =>
     }, []);
 
     const connectWebSocket = () => {
-        const ws = new WebSocket('ws://localhost:8000/ws/analyze');
+        const wsUrl = API_URL.replace(/^http/, 'ws') + '/ws/analyze';
+        const ws = new WebSocket(wsUrl);
         ws.onopen = () => setIsConnected(true);
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -45,7 +47,9 @@ export const GesturesModule: React.FC<GesturesModuleProps> = ({ onComplete }) =>
 
     const startCamera = async () => {
         try {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480 }
+            });
             setStream(mediaStream);
             if (videoRef.current) {
                 videoRef.current.srcObject = mediaStream;
@@ -80,11 +84,15 @@ export const GesturesModule: React.FC<GesturesModuleProps> = ({ onComplete }) =>
                     if (ctx && video.readyState === 4) {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
+
+                        // Mirror the canvas drawing
+                        ctx.translate(canvas.width, 0);
+                        ctx.scale(-1, 1);
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
                         wsRef.current.send(JSON.stringify({
                             task: "gestures",
-                            image: canvas.toDataURL('image/jpeg', 0.5)
+                            image: canvas.toDataURL('image/jpeg', 0.7)
                         }));
                     }
                 }
@@ -142,7 +150,7 @@ export const GesturesModule: React.FC<GesturesModuleProps> = ({ onComplete }) =>
                         autoPlay
                         playsInline
                         muted
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover scale-x-[-1]"
                     />
                     <canvas ref={canvasRef} className="hidden" />
 
